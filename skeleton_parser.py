@@ -233,17 +233,29 @@ def parseJson(json_file):
         for item in items:
             # Collect info needed for object constructors below
             # i.e. ItemID = item[u'Item_ID']
+            ############################
+            item_id = item[u'Item_ID']
+            item_name = item[u'Name']
+            seller_id = item[u'Seller'][u'UserID']
+            buy_price = transformDollar(item[u'Buy_Price'])
+            currently = transformDollar(item[u'Currently'])
+            first_bid = transformDollar(item[u'First_Bid'])
+            number_of_bids = item[u'Number_of_Bids']
+            started = transformDttm(item[u'Started'])
+            end = transformDttm(item[u'End'])
+            description = item[u'Description']
+            ############################
 
             ############################
             # Item Object Initialization
             if len(item) == 14:
                 #Item Object with no Buy_Price
-                my_item = Item(item[u'Item_ID'], item[u'Name'], item[u'Seller'][u'UserID'], transformDollar(item[u'Buy_Price']), transformDollar(item[u'Currently']),
-                            transformDollar(item[u'First_Bid']), item[u'Number_of_Bids'], transformDttm(item[u'Started']), transformDttm(item[u'End']), item[u'Description'])
+                my_item = Item(item_id, item_name, seller_id, buy_price, currently,
+                            first_bid, number_of_bids, started, end, description)
             else:
                 #Item Object with Buy_Price
-                my_item = Item(item[u'Item_ID'], item[u'Name'], item[u'Seller'][0][u'UserID'], None, transformDollar(item[u'Currently']),
-                            transformDollar(item[u'First_Bid']), item[u'Number_of_Bids'], transformDttm(item[u'Started']), transformDttm(item[u'End']), item[u'Description'])
+                my_item = Item(item_id, item_name, seller_id, None, currently,
+                            first_bid, number_of_bids, started, end, description)
             # Add created object to corresponding list
             ItemList.append(my_item)
             ############################
