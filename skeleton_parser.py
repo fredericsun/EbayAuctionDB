@@ -91,7 +91,7 @@ item in the data set. Your job is to extend this functionality to create all
 of the necessary SQL tables for your database.
 """
 
-# Hao
+'''# Yue
 def removeDuplicates(somelist):
     # Your codes below
     pre_contain = []
@@ -99,11 +99,11 @@ def removeDuplicates(somelist):
         if somelist[i][0] in pre_contain:
             somelist.remove(somelist[i])
         pre_contain.append(somelist[i][0])
-    return somelist
+    return somelist'''
 
 
 # Hao
-def saveAsDat(somelist):
+def saveAsDat(somelist, filename):
     # Your codes below
     return
 
@@ -158,7 +158,7 @@ def writeItemTable(ItemList):
             element.append(ItemList[i].getProperty(j) + '|')
         Item_output.append(element)
     # Call removeDuplicates, and saveAsDat methods below
-    return removeDuplicates(Item_output)
+    saveAsDat(Item_output)
 
 
 # Yue
@@ -180,7 +180,7 @@ class Bids:
         if index == 3:
             return self.Amount
 
-# Hao
+# Yue
 def writeBidTable(BidList):
     # Your codes below
     Item_output = []
@@ -190,7 +190,7 @@ def writeBidTable(BidList):
             element.append(BidList[i].getProperty(j) + '|')
         Item_output.append(element)
     # Call removeDuplicates, and saveAsDat methods below
-    return removeDuplicates(Item_output)
+    saveAsDat(Item_output)
 
 
 # Hao
@@ -221,7 +221,7 @@ def writeUserTable(UserList):
     # Call removeDuplicates, and saveAsDat methods below
     return
 
-
+# Yue, Hao, Zhaoyin
 def parseJson(json_file):
     ItemList = []
     BidList = []
