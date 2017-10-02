@@ -105,7 +105,8 @@ def removeDuplicates(somelist):
 # Hao
 def saveAsDat(somelist, filename):
     with open(filename, "a") as f:
-        f.writelines("\n".join(somelist))
+        for row in somelist:
+            f.write(row + "\n")
 
 
 # Yue
@@ -153,9 +154,12 @@ def writeItemTable(ItemList, filename):
     # Your codes below
     Item_output = []
     for i in range(len(ItemList)):
-        element = []
+        element = ""
         for j in range(10):
-            element.append(ItemList[i].getProperty(j) + '|')
+            if j == 9:
+                element += (ItemList[i].getProperty(j))
+            else:
+                element += (ItemList[i].getProperty(j) + '|')
         Item_output.append(element)
     # Call removeDuplicates, and saveAsDat methods below
     saveAsDat(Item_output, filename)
@@ -172,9 +176,9 @@ class Bids:
 
     def getProperty(self, index):
         if index == 0:
-            return self.BidderID
-        if index == 1:
             return self.ItemID
+        if index == 1:
+            return self.BidderID
         if index == 2:
             return self.Time
         if index == 3:
@@ -185,9 +189,12 @@ def writeBidTable(BidList, filename):
     # Your codes below
     Item_output = []
     for i in range(len(BidList)):
-        element = []
+        element = ""
         for j in range(4):
-            element.append(BidList[i].getProperty(j) + '|')
+            if j  == 3:
+                element += (BidList[i].getProperty(j))
+            else:
+                element += (BidList[i].getProperty(j) + '|')
         Item_output.append(element)
     # Call removeDuplicates, and saveAsDat methods below
     saveAsDat(Item_output, filename)
@@ -206,11 +213,11 @@ def writeItemCatTable(ItemCatList, filename):
 # Zhaoyin
 class User:
     # Your codes below
-    def __init__(self, id, rating):
-        self.id = id
+    def __init__(self, userid, rating, location, country):
+        self.userid = userid
         self.rating = rating
-        self.location = None
-        self.country = None
+        self.location = location
+        self.country = country
 
 
 # Zhaoyin
@@ -219,8 +226,7 @@ def writeUserTable(UserList, filename):
     user_dat = []
     # Your codes below
     for user in UserList:
-        dat = str(user.id) + "|" + str(user.rating) + "|" + user.location + \
-              user.country
+        dat = str(user.userid) + "|" + str(user.rating) + "|" + str(user.location) + "|" + str(user.country)
         user_dat.append(dat)
     # removeDuplicates(user_dat)
     saveAsDat(user_dat, filename)
@@ -239,7 +245,7 @@ def parseJson(json_file):
             # Collect info needed for object constructors below
             # i.e. ItemID = item[u'Item_ID']
             ############################
-            item_id = item[u'Item_ID']
+            item_id = item[u'ItemID']
             item_name = item[u'Name']
             seller_id = item[u'Seller'][u'UserID']
             #buy_price = transformDollar(item[u'Buy_Price'])
@@ -247,8 +253,10 @@ def parseJson(json_file):
             first_bid = transformDollar(item[u'First_Bid'])
             number_of_bids = item[u'Number_of_Bids']
             started = transformDttm(item[u'Started'])
-            end = transformDttm(item[u'End'])
+            end = transformDttm(item[u'Ends'])
             description = item[u'Description']
+            if description == None:
+                description = "NULL"
             ############################
 
             ############################
@@ -261,7 +269,7 @@ def parseJson(json_file):
                                description)
             else:
                 # Item Object with Buy_Price
-                my_item = Item(item_id, item_name, seller_id, None, currently,
+                my_item = Item(item_id, item_name, seller_id, "NULL", currently,
                                first_bid, number_of_bids, started, end,
                                description)
             # Add created object to corresponding list
@@ -270,6 +278,7 @@ def parseJson(json_file):
 
             ############################
             # Bids Object Initialization
+            
             if item[u'Bids'] is not None:
                 for bids in item[u'Bids']:
                     keys = bids[u'Bid'][u'Bidder'].keys()
@@ -278,20 +287,35 @@ def parseJson(json_file):
                     BidderID = bids[u'Bid'][u'Bidder'][u'UserID']
                     Time = transformDttm(bids[u'Bid'][u'Time'])
                     Amount = transformDollar(bids[u'Bid'][u'Amount'])
-                    my_bids = Bids(item[u'Item_ID'], BidderID, Time, Amount)
+                    my_bids = Bids(item[u'ItemID'], BidderID, Time, Amount)
                     # Add created object to corresponding list
                     BidList.append(my_bids)
-
-                    user = User(BidderID, bidder[u'Rating'])
+                    location = "NULL"
+                    country = "NULL"
                     if 'Location' in keys:
-                        user.location = bidder[u'Location']
+                        location = bidder[u'Location']
+                        if location == "":
+                            location = "NULL"
                     if 'Country' in keys:
-                        user.country = bidder[u'Country']
+                        country = bidder[u'Country']
+                        if country == "":
+                            country = "NULL"
+                    user = User(BidderID, bidder[u'Rating'], location,
+                                country)
                     UserList.append(user)
-
-
-            user = (seller_id, item[u'Seller'][u'Rating'], item[u'Location'],
-                    item[u'Country'])
+            else:
+                my_bids = Bids(item[u'ItemID'], "NULL", "NULL", "NULL")
+                BidList.append(my_bids)
+                
+            if item[u'Location'] == None:
+                location = "NULL"
+            else: 
+                location = item[u'Location']
+            if item[u'Country'] == None:
+                country = "NULL"
+            else: 
+                country = item[u'Country']
+            user = User(seller_id, item[u'Seller'][u'Rating'], location, country)
             UserList.append(user)
 
             ############################
@@ -300,12 +324,15 @@ def parseJson(json_file):
             # Prepare category list and itemcat list
             jsonItemCat = []
             jsonItemCat = item[u'Category']
-            if jsonItemCat != None:
+            if jsonItemCat != None and jsonItemCat != []:
                 for cat in jsonItemCat:
                     itemcat = item_id + "|" + cat
                     ItemCatList.append(itemcat)
                     if cat not in CategoryList:
                         CategoryList.append(cat)
+            else:
+                itemcat = item_id + "|" + "NULL"
+                ItemCatList.append(itemcat)
 
 
 
