@@ -105,9 +105,28 @@ def removeDuplicates(somelist):
 # Hao
 def saveAsDat(somelist, filename):
     with open(filename, "a") as f:
+        quote = "\""
         for row in somelist:
-            f.write(row + "\n")
+            for ind in range(len(row)):
+                if row[ind] == quote:
+                    row = row[0:ind] + '"' + row[ind:]		
+        f.write(row + "\n")
 
+def handleUnterminated(s):
+    #Remove terminated quotes
+    if s[0] == '"' and s[-1] == '"':
+        s = s[1:-1]
+    #Insert a double quote next to an unterminated quote
+    ind = 0
+    while ind < (len(s)):
+        if s[ind] == '"':
+            s= s[0:ind] + '"' + s[ind:]
+            ind += 2
+        else:
+            ind += 1
+    #Surround the string with terminated quote
+    s = '"' + s + '"'
+    return s
 
 # Yue
 class Item:
@@ -257,6 +276,8 @@ def parseJson(json_file):
             description = item[u'Description']
             if description == None:
                 description = "NULL"
+            else:
+                description = handleUnterminated(description)
             ############################
 
             ############################
@@ -296,10 +317,14 @@ def parseJson(json_file):
                         location = bidder[u'Location']
                         if location == "":
                             location = "NULL"
+                        else: 
+                            location = handleUnterminated(location)
                     if 'Country' in keys:
                         country = bidder[u'Country']
                         if country == "":
                             country = "NULL"
+                        else:
+                            country = handleUnterminated(country)
                     user = User(BidderID, bidder[u'Rating'], location,
                                 country)
                     UserList.append(user)
@@ -311,10 +336,13 @@ def parseJson(json_file):
                 location = "NULL"
             else: 
                 location = item[u'Location']
+                location = handleUnterminated(location)
+                
             if item[u'Country'] == None:
                 country = "NULL"
             else: 
                 country = item[u'Country']
+                country = handleUnterminated(country)
             user = User(seller_id, item[u'Seller'][u'Rating'], location, country)
             UserList.append(user)
 
